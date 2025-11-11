@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
+// Cartoon-style icons (simple SVGs)
+const colorData = [
+  { color: 'Red', hex: '#FF6B6B', icon: '🍎' },
+  { color: 'Blue', hex: '#4D96FF', icon: '🌊' },
+  { color: 'Yellow', hex: '#FFD93D', icon: '🌞' },
+  { color: 'Green', hex: '#6BCB77', icon: '🌿' },
+  { color: 'Orange', hex: '#FFA45B', icon: '🍊' },
+  { color: 'Purple', hex: '#C77DFF', icon: '🪻' },
+  { color: 'Pink', hex: '#FFB5E8', icon: '🎀' },
+  { color: 'Brown', hex: '#B5651D', icon: '🐻' },
+  { color: 'Black', hex: '#000000', icon: '🎩' },
+  { color: 'White', hex: '#FFFFFF', icon: '🐰' },
+];
+
+function Flashcard({ color, hex, icon }) {
+  const [flipped, setFlipped] = useState(false);
+
+  // Play flip sound
+  const playFlipSound = () => {
+    const audio = new Audio(
+      'https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg'
+    );
+    audio.volume = 0.4;
+    audio.play();
+  };
+
+  const handleFlip = () => {
+    playFlipSound();
+    setFlipped(!flipped);
+  };
+
+  return (
+    <div
+      className="relative w-64 h-80 cursor-pointer perspective"
+      onClick={handleFlip}
+    >
+      <div
+        className={`relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ${
+          flipped ? 'rotate-y-180' : ''
+        }`}
+      >
+        {/* Front side */}
+        <div
+          className="absolute w-full h-full rounded-2xl flex flex-col justify-center items-center text-3xl font-bold backface-hidden"
+          style={{ backgroundColor: hex, color: hex === '#FFFFFF' ? '#000' : '#fff' }}
+        >
+          <span className="text-6xl mb-4">{icon}</span>
+          <span>{color}</span>
+        </div>
+
+        {/* Back side */}
+        <div
+          className="absolute w-full h-full rounded-2xl flex justify-center items-center text-3xl font-bold backface-hidden rotate-y-180"
+          style={{ backgroundColor: hex, color: hex === '#FFFFFF' ? '#000' : '#fff' }}
+        >
+          <span>{color}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [index, setIndex] = useState(0);
+  const [stars, setStars] = useState(0);
+
+  const nextCard = () => {
+    setIndex((prev) => (prev + 1) % colorData.length);
+    setStars((s) => s + 1);
+  };
+
+  const prevCard = () => {
+    setIndex((prev) => (prev - 1 + colorData.length) % colorData.length);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-pink-100 to-blue-100 font-sans">
+      <h1 className="text-4xl font-bold mb-8 text-gray-700">Color Fun Flashcards</h1>
+
+      <Flashcard {...colorData[index]} />
+
+      <div className="flex gap-6 mt-8">
+        <button
+          onClick={prevCard}
+          className="bg-white px-4 py-2 rounded-xl shadow hover:shadow-lg transition"
+        >
+          ⬅️ Prev
+        </button>
+        <button
+          onClick={nextCard}
+          className="bg-white px-4 py-2 rounded-xl shadow hover:shadow-lg transition"
+        >
+          Next ➡️
+        </button>
+      </div>
+
+      <p className="mt-6 text-lg text-gray-600">⭐ Stars: {stars}</p>
+
+      <style>{`
+        .perspective { perspective: 1000px; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .backface-hidden { backface-visibility: hidden; }
+        .transform-style-preserve-3d { transform-style: preserve-3d; }
+      `}</style>
+    </div>
+  );
+}
+
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
